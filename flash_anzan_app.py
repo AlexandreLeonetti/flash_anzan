@@ -4,7 +4,7 @@ import os
 from PIL import Image, ImageTk 
 
 class FlashAnzanApp:
-    def __init__(self, root, num_count=3, display_time=1200):
+    def __init__(self, root, num_count=3, display_time=2000):
         self.root = root
         self.root.title("Flash Anzan")
 
@@ -91,7 +91,7 @@ class FlashAnzanApp:
         self.answer_entry.pack_forget()
         self.check_button.pack_forget()
         self.clear_digit_frame()
-        self.digit_frame.pack(pady=(120,20))
+        self.digit_frame.pack(pady=(320,20))
 
         # try changing background color
         self.root.configure(bg="black")
@@ -116,7 +116,7 @@ class FlashAnzanApp:
                 self.displayed_images.append(img_label)  # Keep a reference
             self.current_index += 1
             # After half the display time, clear the digits so they disappear.
-            self.root.after(self.display_time // 2, self.clear_digit_frame)
+            self.root.after(int(self.display_time*0.8), self.clear_digit_frame)
             # After the full display time, show the next number.
             self.root.after(self.display_time, self.display_next_number)
             
