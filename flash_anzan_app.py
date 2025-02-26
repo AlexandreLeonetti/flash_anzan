@@ -1,0 +1,106 @@
+import tkinter as tk
+import random
+import os
+
+class FlashAnzanApp:
+    def __init__(self, root, num_count=3, display_time=1200):
+        self.root = root
+        self.root.title("Flash Anzan")
+
+        # Fix the window size (half the screen width or fixed width as desired)
+        half_width = 600
+        window_height = 600
+        self.root.geometry(f"{half_width}x{window_height}")
+        self.root.configure(bg="black")
+
+        self.num_count = num_count        # Number of numbers to display
+        self.display_time = display_time  # Display time per number in milliseconds
+
+        self.numbers = []
+        self.current_index = 0
+        self.displayed_images = []  # To keep references to PhotoImage labels
+
+        # Load images for digits 0-9
+        self.digit_images = self.load_digit_images()
+
+        # Build the user interface
+        self.setup_ui()
+
+    def load_digit_images(self):
+        """Load images for digits 0-9 from the src/png/ folder."""
+        images = {}
+        for digit in "0123456789":
+            path = os.path.join("src", "png", f"{digit}M.PNG")
+            images[digit] = tk.PhotoImage(file=path)
+        return images
+
+    def setup_ui(self):
+        """Set up the UI components."""
+        self.digit_frame = tk.Frame(self.root, bg="black")
+        self.digit_frame.pack(pady=20)
+
+        self.prompt_label = tk.Label(self.root, text="", font=("Helvetica", 16), bg="white")
+        self.prompt_label.pack()
+
+        self.answer_entry = tk.Entry(self.root, font=("Helvetica", 16))
+        self.result_label = tk.Label(self.root, text="", font=("Helvetica", 16), bg="white")
+        self.result_label.pack(pady=20)
+
+        self.check_button = tk.Button(self.root, text="Check Answer", command=self.check_answer, font=("Helvetica", 16))
+        self.start_button = tk.Button(self.root, text="Start Flash Anzan", command=self.start_flash_anzan, font=("Helvetica", 16))
+        self.start_button.pack(pady=20)
+
+    def clear_digit_frame(self):
+        """Remove all digit image labels from the digit frame."""
+        for widget in self.digit_frame.winfo_children():
+            widget.destroy()
+        self.displayed_images = []
+
+    def start_flash_anzan(self):
+        """Generates random numbers and begins the flash sequence."""
+        # Hide or reset the UI elements
+        self.start_button.pack_forget()
+        self.result_label.config(text="")
+        self.prompt_label.config(text="")
+        self.answer_entry.delete(0, tk.END)
+        self.answer_entry.pack_forget()
+        self.check_button.pack_forget()
+        self.clear_digit_frame()
+
+        # Generate random two-digit numbers.
+        self.numbers = [random.randint(10, 99) for _ in range(self.num_count)]
+        self.current_index = 0
+        self.display_next_number()
+
+    def display_next_number(self):
+        """Displays each number for a set time before showing the input prompt."""
+        if self.current_index < len(self.numbers):
+            self.clear_digit_frame()
+            # Convert the current number to a string and display its digit images.
+            num_str = str(self.numbers[self.current_index])
+            for digit in num_str:
+                img_label = tk.Label(self.digit_frame, image=self.digit_images[digit], bg="black")
+                img_label.pack(side=tk.LEFT, padx=2)
+                self.displayed_images.append(img_label)  # Keep a reference
+            self.current_index += 1
+            self.root.after(self.display_time, self.display_next_number)
+        else:
+            self.clear_digit_frame()
+            self.prompt_label.config(text="Enter the sum of the numbers:")
+            self.answer_entry.pack(pady=5)
+            self.check_button.pack(pady=5)
+
+    def check_answer(self):
+        """Compares the user's input to the correct sum."""
+        try:
+            user_sum = int(self.answer_entry.get())
+        except ValueError:
+            self.result_label.config(text="Please enter a valid number.")
+            return
+
+        correct_sum = sum(self.numbers)
+        if user_sum == correct_sum:
+            self.result_label.config(text="Correct! Well done.")
+        else:
+            self.result_label.config(text=f"Incorrect. The correct sum is {correct_sum}.")
+        self.start_button.pack(pady=20)
