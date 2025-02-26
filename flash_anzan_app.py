@@ -1,6 +1,7 @@
 import tkinter as tk
 import random
 import os
+from PIL import Image, ImageTk 
 
 class FlashAnzanApp:
     def __init__(self, root, num_count=3, display_time=1200):
@@ -26,7 +27,7 @@ class FlashAnzanApp:
         # Build the user interface
         self.setup_ui()
 
-    def load_digit_images(self):
+    def old_load_digit_images(self):
         """Load images for digits 0-9 from the src/png/ folder."""
         images = {}
         for digit in "0123456789":
@@ -34,10 +35,34 @@ class FlashAnzanApp:
             images[digit] = tk.PhotoImage(file=path)
         return images
 
+    def load_digit_images(self):
+        """Load images for digits 0-9 from the src/png/ folder and resize them."""
+        images = {}
+        # Specify a scaling factor or a target size, e.g., 80% of the original
+        scale_factor = 0.8  # or set a fixed size: target_width, target_height = (50, 70)
+        for digit in "0123456789":
+            path = os.path.join("src", "png", f"{digit}M.PNG")
+            # Open the image using PIL
+            pil_image = Image.open(path)
+            
+            # Option 1: Scale by a factor (80% of original size)
+            new_width = int(pil_image.width * scale_factor)
+            new_height = int(pil_image.height * scale_factor)
+            #pil_image = pil_image.resize((new_width, new_height), Image.ANTIALIAS)
+            pil_image = pil_image.resize((new_width, new_height), Image.LANCZOS)
+
+            
+            # Option 2: Alternatively, you can set a fixed size:
+            # pil_image = pil_image.resize((50, 70), Image.ANTIALIAS)
+            
+            # Convert back to Tkinter PhotoImage
+            images[digit] = ImageTk.PhotoImage(pil_image)
+        return images
+
     def setup_ui(self):
         """Set up the UI components."""
         self.digit_frame = tk.Frame(self.root, bg="green")
-        self.digit_frame.pack(pady=20)
+        self.digit_frame.pack(pady=(120,20))
 
         self.prompt_label = tk.Label(self.root, text="", font=("Helvetica", 16), bg="grey")
         self.prompt_label.pack()
@@ -66,6 +91,7 @@ class FlashAnzanApp:
         self.answer_entry.pack_forget()
         self.check_button.pack_forget()
         self.clear_digit_frame()
+        self.digit_frame.pack(pady=(120,20))
 
         # try changing background color
         self.root.configure(bg="black")
@@ -89,7 +115,11 @@ class FlashAnzanApp:
                 img_label.pack(side=tk.LEFT, padx=2)
                 self.displayed_images.append(img_label)  # Keep a reference
             self.current_index += 1
+            # After half the display time, clear the digits so they disappear.
+            self.root.after(self.display_time // 2, self.clear_digit_frame)
+            # After the full display time, show the next number.
             self.root.after(self.display_time, self.display_next_number)
+            
         else:
             self.clear_digit_frame()
             self.prompt_label.config(text="Enter the sum of the numbers:")
@@ -100,6 +130,7 @@ class FlashAnzanApp:
             self.digit_frame.configure(bg="grey")
             self.prompt_label.configure(bg="grey")
             self.result_label.configure(bg="grey")
+            self.digit_frame.pack(pady=(20))
 
     def check_answer(self):
         """Compares the user's input to the correct sum."""
