@@ -8,10 +8,10 @@ class FlashAnzanApp:
         self.root.title("Flash Anzan")
 
         # Fix the window size (half the screen width or fixed width as desired)
-        half_width = 600
-        window_height = 600
+        half_width = 800
+        window_height = 700
         self.root.geometry(f"{half_width}x{window_height}")
-        self.root.configure(bg="black")
+        self.root.configure(bg="grey")
 
         self.num_count = num_count        # Number of numbers to display
         self.display_time = display_time  # Display time per number in milliseconds
@@ -36,14 +36,14 @@ class FlashAnzanApp:
 
     def setup_ui(self):
         """Set up the UI components."""
-        self.digit_frame = tk.Frame(self.root, bg="black")
+        self.digit_frame = tk.Frame(self.root, bg="green")
         self.digit_frame.pack(pady=20)
 
-        self.prompt_label = tk.Label(self.root, text="", font=("Helvetica", 16), bg="white")
+        self.prompt_label = tk.Label(self.root, text="", font=("Helvetica", 16), bg="grey")
         self.prompt_label.pack()
 
         self.answer_entry = tk.Entry(self.root, font=("Helvetica", 16))
-        self.result_label = tk.Label(self.root, text="", font=("Helvetica", 16), bg="white")
+        self.result_label = tk.Label(self.root, text="", font=("Helvetica", 16), bg="grey" )
         self.result_label.pack(pady=20)
 
         self.check_button = tk.Button(self.root, text="Check Answer", command=self.check_answer, font=("Helvetica", 16))
@@ -67,6 +67,12 @@ class FlashAnzanApp:
         self.check_button.pack_forget()
         self.clear_digit_frame()
 
+        # try changing background color
+        self.root.configure(bg="black")
+        self.digit_frame.configure(bg="black")
+        self.prompt_label.configure(bg="black")
+        self.result_label.configure(bg="black")
+
         # Generate random two-digit numbers.
         self.numbers = [random.randint(10, 99) for _ in range(self.num_count)]
         self.current_index = 0
@@ -89,6 +95,11 @@ class FlashAnzanApp:
             self.prompt_label.config(text="Enter the sum of the numbers:")
             self.answer_entry.pack(pady=5)
             self.check_button.pack(pady=5)
+            # try changing background color
+            self.root.configure(bg="grey")
+            self.digit_frame.configure(bg="grey")
+            self.prompt_label.configure(bg="grey")
+            self.result_label.configure(bg="grey")
 
     def check_answer(self):
         """Compares the user's input to the correct sum."""
