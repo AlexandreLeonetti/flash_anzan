@@ -27,13 +27,11 @@ class FlashAnzanApp:
         # Build the user interface
         self.setup_ui()
 
-    def old_load_digit_images(self):
-        """Load images for digits 0-9 from the src/png/ folder."""
-        images = {}
-        for digit in "0123456789":
-            path = os.path.join("src", "png", f"{digit}M.PNG")
-            images[digit] = tk.PhotoImage(file=path)
-        return images
+
+    def generate_numbers(self):
+        # This method generates a list of two-digit numbers.
+        # You can later change this implementation to generate more "challenging" numbers.
+        return [random.randint(10, 99) for _ in range(self.num_count)]
 
     def load_digit_images(self):
         """Load images for digits 0-9 from the src/png/ folder and resize them."""
@@ -91,7 +89,7 @@ class FlashAnzanApp:
         self.answer_entry.pack_forget()
         self.check_button.pack_forget()
         self.clear_digit_frame()
-        self.digit_frame.pack(pady=(320,20))
+        self.digit_frame.pack(pady=(120,20))
 
         # try changing background color
         self.root.configure(bg="black")
@@ -99,8 +97,14 @@ class FlashAnzanApp:
         self.prompt_label.configure(bg="black")
         self.result_label.configure(bg="black")
 
-        # Generate random two-digit numbers.
-        self.numbers = [random.randint(10, 99) for _ in range(self.num_count)]
+        # Generate random two-digit numbers. 
+        # hey chatGPT apparently this here that the numbers are generated
+        # could it be possible to separate this to some method ?
+        # or maybe some adapter design pattern or whatever,
+        # because i would like to be able to change the algorithm of numbers generation without affecting the rest of the app behavior.
+        #self.numbers = [random.randint(10, 99) for _ in range(self.num_count)]
+        self.numbers = self.generate_numbers()
+
         self.current_index = 0
         self.display_next_number()
 
