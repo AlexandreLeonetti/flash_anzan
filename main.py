@@ -4,8 +4,8 @@ from flash_anzan_app import FlashAnzanApp
 
 def main():
     root = tk.Tk()
-    hard_gen = HardNumberGenerator(num_count=5)
-    app = FlashAnzanApp(root, num_count=5, display_time=4000, number_generator=hard_gen)
+    hard_gen = HardNumberGenerator(num_count=8)
+    app = FlashAnzanApp(root, num_count=2, display_time=3200, number_generator=hard_gen)
     root.mainloop()
 
 if __name__ == '__main__':
