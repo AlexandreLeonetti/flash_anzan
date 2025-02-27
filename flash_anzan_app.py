@@ -3,18 +3,27 @@ import random
 import os
 from PIL import Image, ImageTk 
 
+
+class DefaultNumberGenerator:
+    def __init__(self, num_count):
+        self.num_count = num_count
+
+    def generate(self):
+        return [random.randint(10, 99) for _ in range(self.num_count)]
+
+
 class FlashAnzanApp:
-    def __init__(self, root, num_count=3, display_time=2000):
+    def __init__(self, root, num_count=3, display_time=2000, number_generator=None):
+        self.num_count = num_count
+        self.number_generator = number_generator or DefaultNumberGenerator(self.num_count)
         self.root = root
         self.root.title("Flash Anzan")
-
         # Fix the window size (half the screen width or fixed width as desired)
         half_width = 800
         window_height = 700
         self.root.geometry(f"{half_width}x{window_height}")
         self.root.configure(bg="grey")
 
-        self.num_count = num_count        # Number of numbers to display
         self.display_time = display_time  # Display time per number in milliseconds
 
         self.numbers = []
@@ -97,13 +106,9 @@ class FlashAnzanApp:
         self.prompt_label.configure(bg="black")
         self.result_label.configure(bg="black")
 
-        # Generate random two-digit numbers. 
-        # hey chatGPT apparently this here that the numbers are generated
-        # could it be possible to separate this to some method ?
-        # or maybe some adapter design pattern or whatever,
-        # because i would like to be able to change the algorithm of numbers generation without affecting the rest of the app behavior.
         #self.numbers = [random.randint(10, 99) for _ in range(self.num_count)]
-        self.numbers = self.generate_numbers()
+        #self.numbers = self.generate_numbers()
+        self.numbers = self.number_generator.generate()
 
         self.current_index = 0
         self.display_next_number()
