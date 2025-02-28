@@ -80,6 +80,11 @@ class FlashAnzanApp:
 
         self.check_button = tk.Button(self.root, text="Check Answer", command=self.check_answer, font=("Helvetica", 16))
         self.start_button = tk.Button(self.root, text="Start Flash Anzan", command=self.start_flash_anzan, font=("Helvetica", 16))
+
+        # hey chatGPT, can you create a functionality that can make me replay the last serie of numbers ?
+        # i guess it is the same as start_flash_anzan method just using previous serie ?
+        self.replay_button = tk.Button(self.root, text="Re try", command=self.start_flash_anzan_with_same_serie, font=("Helvetica", 16) )
+
         self.start_button.pack(pady=20)
 
     def clear_digit_frame(self):
@@ -92,6 +97,7 @@ class FlashAnzanApp:
         """Generates random numbers and begins the flash sequence."""
         # Hide or reset the UI elements
         self.start_button.pack_forget()
+        self.replay_button.pack_forget()
         self.result_label.config(text="")
         self.prompt_label.config(text="")
         self.answer_entry.delete(0, tk.END)
@@ -109,6 +115,32 @@ class FlashAnzanApp:
         #self.numbers = [random.randint(10, 99) for _ in range(self.num_count)]
         #self.numbers = self.generate_numbers()
         self.numbers = self.number_generator.generate()
+
+        self.current_index = 0
+        self.display_next_number()
+
+    def start_flash_anzan_with_same_serie(self):
+        """Generates random numbers and begins the flash sequence."""
+        # Hide or reset the UI elements
+        self.start_button.pack_forget()
+        self.replay_button.pack_forget()
+        self.result_label.config(text="")
+        self.prompt_label.config(text="")
+        self.answer_entry.delete(0, tk.END)
+        self.answer_entry.pack_forget()
+        self.check_button.pack_forget()
+        self.clear_digit_frame()
+        self.digit_frame.pack(pady=(120,20))
+
+        # try changing background color
+        self.root.configure(bg="black")
+        self.digit_frame.configure(bg="black")
+        self.prompt_label.configure(bg="black")
+        self.result_label.configure(bg="black")
+
+        #self.numbers = [random.randint(10, 99) for _ in range(self.num_count)]
+        #self.numbers = self.generate_numbers()
+        #self.numbers = self.number_generator.generate()
 
         self.current_index = 0
         self.display_next_number()
@@ -141,8 +173,8 @@ class FlashAnzanApp:
             self.result_label.configure(bg="grey")
             self.digit_frame.pack(pady=(20))
 
+
     def check_answer(self):
-        """Compares the user's input to the correct sum."""
         try:
             user_sum = int(self.answer_entry.get())
         except ValueError:
@@ -154,4 +186,7 @@ class FlashAnzanApp:
             self.result_label.config(text="Correct! Well done.")
         else:
             self.result_label.config(text=f"Incorrect. The correct sum is {correct_sum}.")
+        
+        # Show both buttons so user can either replay or start a new series
         self.start_button.pack(pady=20)
+        self.replay_button.pack(pady=20)
