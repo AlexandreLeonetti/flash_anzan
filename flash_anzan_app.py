@@ -3,6 +3,27 @@ import random
 import os
 from PIL import Image, ImageTk 
 
+import pygame
+import threading
+import time
+
+# Initialize pygame mixer
+pygame.mixer.init()
+def play_countdown():
+    countdown_sound = pygame.mixer.Sound("src/SOUNDPS/START01.wav")
+    countdown_sound.set_volume(0.3)
+    countdown_sound.play()
+
+def play_countdown_async():
+    threading.Thread(target=play_countdown, daemon=True).start()
+
+def play_beep():
+    beep_sound = pygame.mixer.Sound("src/SOUNDPS/bip1.wav")
+    beep_sound.set_volume(0.5)  # Set volume (0.0 = mute, 1.0 = max)
+    beep_sound.play()
+
+def play_beep_async():
+    threading.Thread(target=play_beep, daemon=True).start()
 
 class DefaultNumberGenerator:
     def __init__(self, num_count):
@@ -38,8 +59,6 @@ class FlashAnzanApp:
 
 
     def generate_numbers(self):
-        # This method generates a list of two-digit numbers.
-        # You can later change this implementation to generate more "challenging" numbers.
         return [random.randint(10, 99) for _ in range(self.num_count)]
 
     def load_digit_images(self):
@@ -49,6 +68,7 @@ class FlashAnzanApp:
         scale_factor = 0.8  # or set a fixed size: target_width, target_height = (50, 70)
         for digit in "0123456789":
             path = os.path.join("src", "png", f"{digit}M.PNG")
+
             # Open the image using PIL
             pil_image = Image.open(path)
             
@@ -58,10 +78,6 @@ class FlashAnzanApp:
             #pil_image = pil_image.resize((new_width, new_height), Image.ANTIALIAS)
             pil_image = pil_image.resize((new_width, new_height), Image.LANCZOS)
 
-            
-            # Option 2: Alternatively, you can set a fixed size:
-            # pil_image = pil_image.resize((50, 70), Image.ANTIALIAS)
-            
             # Convert back to Tkinter PhotoImage
             images[digit] = ImageTk.PhotoImage(pil_image)
         return images
@@ -81,8 +97,6 @@ class FlashAnzanApp:
         self.check_button = tk.Button(self.root, text="Check Answer", command=self.check_answer, font=("Helvetica", 16))
         self.start_button = tk.Button(self.root, text="Start Flash Anzan", command=self.start_flash_anzan, font=("Helvetica", 16))
 
-        # hey chatGPT, can you create a functionality that can make me replay the last serie of numbers ?
-        # i guess it is the same as start_flash_anzan method just using previous serie ?
         self.replay_button = tk.Button(self.root, text="Re try", command=self.start_flash_anzan_with_same_serie, font=("Helvetica", 16) )
 
         self.start_button.pack(pady=20)
@@ -117,7 +131,10 @@ class FlashAnzanApp:
         self.numbers = self.number_generator.generate()
 
         self.current_index = 0
-        self.display_next_number()
+        # hey chatgpt, check this out :
+        play_countdown()# this sound lasts about a second
+        self.root.after(1900, self.display_next_number)
+        #self.display_next_number()
 
     def start_flash_anzan_with_same_serie(self):
         """Generates random numbers and begins the flash sequence."""
@@ -138,17 +155,17 @@ class FlashAnzanApp:
         self.prompt_label.configure(bg="black")
         self.result_label.configure(bg="black")
 
-        #self.numbers = [random.randint(10, 99) for _ in range(self.num_count)]
-        #self.numbers = self.generate_numbers()
-        #self.numbers = self.number_generator.generate()
-
         self.current_index = 0
-        self.display_next_number()
+        play_countdown()# this sound lasts about a second
+        self.root.after(1900, self.display_next_number)
+        #self.display_next_number()
 
+    # flicking numbers 
     def display_next_number(self):
         """Displays each number for a set time before showing the input prompt."""
         if self.current_index < len(self.numbers):
             self.clear_digit_frame()
+            play_beep_async()  # Or play_beep_async() if using threading and playsound
             # Convert the current number to a string and display its digit images.
             num_str = str(self.numbers[self.current_index])
             for digit in num_str:
@@ -160,11 +177,15 @@ class FlashAnzanApp:
             self.root.after(int(self.display_time*0.8), self.clear_digit_frame)
             # After the full display time, show the next number.
             self.root.after(self.display_time, self.display_next_number)
-            
+        # entry of answer 
         else:
+            # hey chatGPT
             self.clear_digit_frame()
-            self.prompt_label.config(text="Enter the sum of the numbers:")
+            self.prompt_label.config(text="Enter the sum of the numbers:")#
             self.answer_entry.pack(pady=5)
+            self.answer_entry.focus_set()  # Automatically set focus to the entry field
+            self.answer_entry.bind("<Return>", lambda event: self.check_answer())  # Bind Enter key to check_answer
+
             self.check_button.pack(pady=5)
             # try changing background color
             self.root.configure(bg="grey")
@@ -184,8 +205,17 @@ class FlashAnzanApp:
         correct_sum = sum(self.numbers)
         if user_sum == correct_sum:
             self.result_label.config(text="Correct! Well done.")
+            # remove enter the number, entry field, check answer
+            self.check_button.pack_forget()
+            self.prompt_label.pack_forget()
+            self.answer_entry.pack_forget()
+
         else:
             self.result_label.config(text=f"Incorrect. The correct sum is {correct_sum}.")
+            # cleaning entry interface after submitting answer
+            self.check_button.pack_forget()
+            self.prompt_label.pack_forget()
+            self.answer_entry.pack_forget()
         
         # Show both buttons so user can either replay or start a new series
         self.start_button.pack(pady=20)
